@@ -1,4 +1,6 @@
 ﻿using System.Diagnostics;
+using System.Threading.Channels;
+using System.Threading.Tasks;
 
 namespace PerformanceDemo
 {
@@ -6,23 +8,31 @@ namespace PerformanceDemo
 	{
 		static async Task Main(string[] args)
 		{
-			Console.WriteLine("C# Performans Teknikleri Demonstrasyonu");
-			Console.WriteLine("---------------------------------------");
+			//Console.WriteLine("C# Performans Teknikleri Demonstrasyonu");
+			//Console.WriteLine("---------------------------------------");
 
-			Console.WriteLine("1. Span<T> ve Memory<T> Kullanımı");
-			SpanVsArrayDemo();
+			//Console.WriteLine("1. Span<T> ve Memory<T> Kullanımı");
+			//SpanVsArrayDemo();
 
-			Console.WriteLine("\n2. ReaderWriterLockSlim Kullanımı");
-			await ReaderWriterLockDemo();
+			//Console.WriteLine("\n2. ReaderWriterLockSlim Kullanımı");
+			//await ReaderWriterLockDemo();
 
-			Console.WriteLine("\n3. AsyncLocal<T> ile Asenkron Bağlam Aktarımı");
-			await AsyncLocalDemo();
+			//Console.WriteLine("\n3. AsyncLocal<T> ile Asenkron Bağlam Aktarımı");
+			//await AsyncLocalDemo();
 
-			Console.WriteLine("\n4. LINQ'de ToHashSet() ve ToDictionary() ile Optimizasyon");
-			LINQOptimizationDemo();
+			//Console.WriteLine("\n4. LINQ'de ToHashSet() ve ToDictionary() ile Optimizasyon");
+			//LINQOptimizationDemo();
+
+
+			Console.WriteLine("\n5. Channel<T> Kullanımı");
+			await ChannelUsage();
+
 
 			Console.WriteLine("\nDemo tamamlandı. Çıkmak için bir tuşa basın.");
 			Console.ReadKey();
+
+
+
 		}
 
 		#region 1. Span<T> ve Memory<T> Demonstrasyonu
@@ -253,6 +263,51 @@ namespace PerformanceDemo
 			Console.WriteLine($"Dictionary lookup süresi: {sw.ElapsedTicks} ticks");
 		}
 		#endregion
+
+		#region Channel<T> Kullanımı
+
+
+		static async Task ChannelUsage()
+		{
+			var channel = Channel.CreateUnbounded<int>();
+
+
+			_ = Task.Run(async () =>
+			{
+				for (int i = 1; i <= 10; i++)
+				{
+					await channel.Writer.WriteAsync(i); // Sensör verisini yaz
+					Console.WriteLine($"Üretildi: {i}");
+					await Task.Delay(200); // Sensör verisi 200ms'de bir geliyor
+				}
+				channel.Writer.Complete(); // Yazma işlemi tamamlandı
+			});
+
+			// Tüketici (Consumer): Verileri işleyen servis
+			await Task.Run(async () =>
+			{
+				await foreach (var data in channel.Reader.ReadAllAsync())
+				{
+					Console.WriteLine($"Tüketildi: {data}");
+					await Task.Delay(500); // İşlem süresi 500ms
+				}
+			});
+
+
+		}
+
+		/*
+		   Thread-safe çalışır, ek lock mekanizmalarına gerek yoktur.
+           Asenkron çalıştığı için ana thread’i bloke etmez.
+           Producer ve Consumer birbirinden bağımsız hızlarda çalışabilir.
+           Özellikle mikro servisler veya IoT sistemleri için idealdir.
+		*/
+
+
+
+		#endregion
+
+
 	}
 
 	class Product
