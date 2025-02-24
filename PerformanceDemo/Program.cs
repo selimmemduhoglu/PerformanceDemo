@@ -149,10 +149,8 @@ namespace PerformanceDemo
                      Toplam: 7890 karakter (ideal durumda)
 				
 				3912 karakter olduğu için yaklaşık % 50’sinde başarılı okuma yapılabilmiş gibi görünüyor.
-
 				Veri hala bellekte var, ancak okuma işlemi yazma işlemiyle tam senkronize çalışmadığı için bazı döngülerde çağrı başarısız oluyor.
-				 
-				 Eğer ki, await writeTask ve await readTask diyerek aynı anda değilde farklı farklı işlemler yapılsaydı 7890 karakter elde ederdik.
+				Eğer ki, await writeTask ve await readTask diyerek aynı anda değilde farklı farklı işlemler yapılsaydı 7890 karakter elde ederdik.
 	   */
 
 
